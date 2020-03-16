@@ -1,36 +1,58 @@
-#define BLYNK_PRINT Serial 
+#define BLYNK_PRINT Serial
+
+
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
-#define D0 13
-#define D1 10
-WidgetLED led(V3);
+#include <SimpleDHT.h>
+#include <SimpleTimer.h>
 
-char auth[] = "5759ccff59454cc1a65c0e3c7b5340e8";
-char server[] = "oasiskit.com";
-char ssid[] = "ArcHeR-OMEN";
-char pass[] = "Bb20072536";
-int port = 8080;
-char led1 = D0;
-char led2 = D1;
-bool lock1 = false;
+// DHT Config
+int pinDHT22 = D5;
+SimpleDHT22 dht22;
 
-void setup() {
-  Serial.begin(115200);
-  Serial.println("กำลังเชื่อมต่อไปที่ Blynk Server");
-  pinMode(D0, OUTPUT); //กำหนดโหมด ว่าเป็น INPUT หรือ OUTPUT
-  pinMode(D1, OUTPUT);
-  WiFi.begin(ssid, pass); //เชื่อมต่อ WiFi
-  Blynk.config(auth, server, port); //กำหนด Token key , ชื่อ Server และ port
-  Blynk.connect(); //เชื่อมต่อไปยัง Blynk
+// SET Timer
+SimpleTimer timer;
+
+// You should get Auth Token in the Blynk App.
+// Go to the Project Settings (nut icon).
+char auth[] = " 2giJUJkaaVIk4Z9_0r8p7UAn3w2bN-bP";
+
+// Your WiFi credentials.
+// Set password to "" for open networks.
+char ssid[] = "PCR008-5G";
+char pass[] = "0874597999";
+
+BLYNK_CONNECTED() {
+    Blynk.syncAll();
 }
 
-BLYNK_CONNECTED() {  // ฟังก์ชันนี้ทำงานเมื่อต่อ Blynk ได้ 
-  Serial.println("App Blynk ทำงาน!");
+void setup()
+{
+  // Debug console
+  Serial.begin(9600);
+
+  Blynk.begin(auth, ssid, pass);
+  // You can also specify server:
+  //Blynk.begin(auth, ssid, pass, "blynk-cloud.com", 8442);
+  //Blynk.begin(auth, ssid, pass, IPAddress(192,168,1,100), 8442);
+  timer.setInterval(4000L, sendTemp);
 }
 
-void loop() {
-  
+void sendTemp()
+{
+  float temperature = 0;
+  float humidity = 0;
+  int err = SimpleDHTErrSuccess;
+  if ((err = dht22.read2(pinDHT22, &temperature, &humidity, NULL)) != SimpleDHTErrSuccess) {
+    Serial.print("Read DHT22 failed, err="); Serial.println(err);delay(1000);
+    return;
+  }  
+  Blynk.virtualWrite(10, temperature); // virtual pin 
+  Blynk.virtualWrite(11, humidity); // virtual pin 
+}
+
+void loop()
+{
   Blynk.run();
-
-
+  timer.run();
 }
