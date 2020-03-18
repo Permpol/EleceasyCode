@@ -31,10 +31,9 @@ void setup()
   // Debug console
   Serial.begin(9600);
 
-  Blynk.begin(auth, ssid, pass);
+ 
   // You can also specify server:
-  //Blynk.begin(auth, ssid, pass, "blynk-cloud.com", 8442);
-  //Blynk.begin(auth, ssid, pass, IPAddress(192,168,1,100), 8442);
+  Blynk.begin(auth, ssid, pass, "blynk.iot-cm.com", 8080);
   timer.setInterval(4000L, sendTemp);
 }
 
