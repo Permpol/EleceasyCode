@@ -8,7 +8,7 @@
 #define DHTPIN 12 
 #define DHTTYPE DHT11
 
-DHT dht(DHTPIN, DHTTYPE);
+DHT_Unified dht(DHTPIN, DHTTYPE);
 
 char auth[] = "xxxxxxxxxxxxxxxxxxxx";
  
