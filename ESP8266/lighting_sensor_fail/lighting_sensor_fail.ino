@@ -1,9 +1,13 @@
+#include <TridentTD_LineNotify.h>
 #include <Adafruit_GFX.h>        //OLED libraries
 #include <Adafruit_SSD1306.h>
 #include <Wire.h>
 #include "MAX30105.h"           //MAX3010x library
 #include "heartRate.h"          //Heart rate calculating algorithm
 
+#define SSID        "xxxx"      // บรรทัดที่ 11 ให้ใส่ ชื่อ Wifi ที่จะเชื่อมต่อ
+#define PASSWORD    "xxxxx"     // บรรทัดที่ 12 ใส่ รหัส Wifi
+#define LINE_TOKEN  "xxxxxxx"   // บรรทัดที่ 13 ใส่ รหัส TOKEN ที่ได้มาจากข้างบน
 MAX30105 particleSensor;
 
 const byte RATE_SIZE = 4; //Increase this for more averaging. 4 is good.
@@ -37,6 +41,13 @@ static const unsigned char PROGMEM logo3_bmp[] =
 
 
 void setup() {  
+  Serial.begin(115200); Serial.println();
+  Serial.println(LINE.getVersion());
+
+  WiFi.begin(SSID, PASSWORD);
+  Serial.printf("WiFi connecting to %s\n",  SSID);
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C); //Start the OLED display
   display.display();
   delay(3000);
@@ -44,7 +55,7 @@ void setup() {
   particleSensor.begin(Wire, I2C_SPEED_FAST); //Use default I2C port, 400kHz speed
   particleSensor.setup(); //Configure sensor with default settings
   particleSensor.setPulseAmplitudeRed(0x0A); //Turn Red LED to low to indicate sensor is running
-
+  LINE.setToken(LINE_TOKEN);
 }
 
 void loop() {
@@ -91,6 +102,12 @@ if(irValue > 7000){                                           //If a finger is d
       for (byte x = 0 ; x < RATE_SIZE ; x++)
         beatAvg += rates[x];
       beatAvg /= RATE_SIZE;
+      if(beatAvg < 50 ){
+        LINE.notify("อัตราการเต้นของหัวใจต่ำ");
+         if(beatAvg > 120 ){
+        LINE.notify("อัตราการเต้นของหัวใจสูง");
+        
+      }
     }
   }
 
@@ -106,6 +123,7 @@ if(irValue > 7000){                                           //If a finger is d
      display.println("your finger ");  
      display.display();
      noTone(3);
+      LINE.notify("ไม่ได้สวมใส่");
      }
 
 }
