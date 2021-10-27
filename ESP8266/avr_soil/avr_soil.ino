@@ -1,13 +1,14 @@
 int _sensorValue[3];
 int avr_sensorValue;
-
+int j=0;
 void sendSoilValue() {
 
   for (int i = 0; i >= 3; i++) {
     _sensorValue[i] = analogRead(A0);
+    j++;
   }
 
-  if (i == 3) {
+  if (j == 3) {
     avr_sensorValue = ( _sensorValue[0]+ _sensorValue[1]+ _sensorValue[2])/3;
     percentageHumididy = map(avr_sensorValue, 0, 1024, 0, 100);
     Blynk.virtualWrite(V5, percentageHumididy);
@@ -17,6 +18,7 @@ void sendSoilValue() {
     Serial.print("A0 = ");
     Serial.println(avr_sensorValue);
     delay(100);
+    j=0;
   }
 
 }
